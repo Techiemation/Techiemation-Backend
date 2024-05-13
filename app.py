@@ -1,21 +1,24 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS
+from flask.helpers import send_from_directory
+from flask_cors import CORS, cross_origin
 import requests
 import uuid
 # from scraper import scrape_webpage
 from test_scraper import scrape_website
 from text_summarizer import summarizer
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='Frontend-main/build', static_url_path='')
 CORS(app)
 
 
 @app.route('/')
+@cross_origin()
 def home():
-    return "Hello User"
+    return send_from_directory(app.static_folder, 'index.html')
 
 
 @app.route('/api/scrape', methods=['GET'])
+@cross_origin()
 def scrape():
     url = request.args.get('url')
     content = scrape_website(url)
@@ -26,10 +29,12 @@ def scrape():
 
 
 @app.route('/translator', methods=['POST'])
+@cross_origin()
 def translate():
     data = request.json  # Get JSON data from the request body
     original_text = data.get('text')  # Get the 'text' field from the JSON data
-    target_language = data.get('language')  # Get the 'language' field from the JSON data
+    # Get the 'language' field from the JSON data
+    target_language = data.get('language')
 
     print(f"Received request with text: {original_text}")
     print(f"Received request with language: {target_language}")
@@ -57,7 +62,8 @@ def translate():
     body = [{'text': original_text}]
 
     # Make the call using post
-    translator_request = requests.post(constructed_url, headers=headers, json=body)
+    translator_request = requests.post(
+        constructed_url, headers=headers, json=body)
     # Retrieve the JSON response
     translator_response = translator_request.json()
     # Retrieve the translation
@@ -71,12 +77,14 @@ def translate():
 
 
 @app.route('/summarize', methods=['POST'])
+@cross_origin()
 def summarize():
     data = request.json  # Get JSON data from the request body
     rawtext = data.get('text')  # Get the 'text' field from the JSON data
 
     if request.method == 'POST':
-        summary, original_text, len_original_text, len_summary = summarizer(rawtext)
+        summary, original_text, len_original_text, len_summary = summarizer(
+            rawtext)
 
         return jsonify({
             "summarized_text": summary,
