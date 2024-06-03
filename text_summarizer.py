@@ -115,8 +115,6 @@ def summarizer(rawtext):
 
     tokens = [token.text for token in doc]
 
-    # print("Tokens: ", tokens)
-
     word_freq = {}
 
     for word in doc:
@@ -126,20 +124,12 @@ def summarizer(rawtext):
             else:
                 word_freq[word.text] += 1
 
-    # print(word_freq)
-
     max_freq = max(word_freq.values())
-
-    # print(max_freq)
 
     for word in word_freq.keys():
         word_freq[word] = word_freq[word] / max_freq
 
-    # print(word_freq)
-
     sent_tokens = [sent for sent in doc.sents]
-
-    # print(sent_tokens)
 
     sent_score = {}
 
@@ -151,24 +141,15 @@ def summarizer(rawtext):
                 else:
                     sent_score[sent] += word_freq[word.text]
 
-    # print(sent_score)
-
     select_length = int(len(sent_tokens) * 0.3)
-    # print(select_length)
     summary = nlargest(select_length, sent_score, key=sent_score.get)
-    # print(summary)
 
     final_summary = [word.text for word in summary]
     summary = ' '.join(final_summary[::-1])  # Reverse the order of the summary
-    # print("Original Text: " + text)
-    # print("Summary: " + summary)
-
-    # print("Length of Original Text: ", len(text.split(' ')))
-    # print("Length of Summary: ", len(summary.split(' ')))
 
     return summary, doc, len(rawtext.split(' ')), len(summary.split(' '))
 
 
 if __name__ == "__main__":
-    text = "If you’re more familiar with a dynamic language, such as Ruby, Python, or JavaScript, you might not be used to compiling and running a program as separate steps. Rust is an ahead-of-time compiled language, meaning you can compile a program and give the executable to someone else, and they can run it even without having Rust installed. If you give someone a .rb, .py, or .js file, they need to have a Ruby, Python, or JavaScript implementation installed (respectively). But in those languages, you only need one command to compile and run your program. Everything is a trade-off in language design."
+    text = "Dynamic languages you’re more familiar with, such as Ruby, Python, or JavaScript, you might not be used to compiling and running a program as separate steps. Rust is an ahead-of-time compiled language, meaning you can compile a program and give the executable to someone else, and they can run it even without having Rust installed. If you give someone a .rb, .py, or .js file, they need to have a Ruby, Python, or JavaScript implementation installed (respectively). But in those languages, you only need one command to compile and run your program. Everything is a trade-off in language design."
     print(summarizer(text))

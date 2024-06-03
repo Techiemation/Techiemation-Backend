@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from flask.helpers import send_from_directory
+# from flask.helpers import send_from_directory
 from flask_cors import CORS, cross_origin
 import requests
 import uuid
@@ -7,14 +7,16 @@ import uuid
 from test_scraper import scrape_website
 from text_summarizer import summarizer
 
-app = Flask(__name__, static_folder='Frontend-main/build', static_url_path='')
+# app = Flask(__name__, static_folder='Frontend-main/build', static_url_path='') # OLD
+app = Flask(__name__)   # NEW
 CORS(app)
 
 
 @app.route('/')
 @cross_origin()
 def home():
-    return send_from_directory(app.static_folder, 'index.html')
+    # return send_from_directory(app.static_folder, 'index.html')   # OLD
+    return "<h1>Backend is Working...</h1>"     # NEW
 
 
 @app.route('/api/scrape', methods=['GET'])
@@ -25,7 +27,7 @@ def scrape():
     if content:
         return jsonify(content)
     else:
-        return jsonify({"error": "Failed to scrape the webpage."}), 500
+        return jsonify({"Error": "Failed to scrape the webpage."}), 500
 
 
 @app.route('/translator', methods=['POST'])
