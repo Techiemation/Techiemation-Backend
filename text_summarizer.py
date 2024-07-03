@@ -1,54 +1,80 @@
 import spacy
+import transformers
+import torch
 from spacy.lang.en.stop_words import STOP_WORDS
 from string import punctuation
 from heapq import nlargest
+from transformers import T5Tokenizer, T5ForConditionalGeneration, T5Config
 
 rawtext1 = """
 """
 
 
 def summarizer(rawtext):
-    stopwords = list(STOP_WORDS)
+    
+    print(len(rawtext))
+    if len(rawtext) < 1000:
+        print("Text is analyzed by Transformer")
+        
+        model = T5ForConditionalGeneration.from_pretrained('t5-small')
+        tokenizer = T5Tokenizer.from_pretrained('t5-small')
+        device = torch.device('cpu')
+        
+        preprocessed_text = rawtext.strip().replace('\n','')
+        t5_input_text = "summarize: " + preprocessed_text
+
+        t5_input_text
+        
+        tokenized_text = tokenizer.encode(t5_input_text, return_tensors='pt', max_length=512).to(device)
+        summary_ids = model.generate(tokenized_text, min_length=30, max_length=200)
+        summary = tokenizer.decode(summary_ids[0], skip_special_tokens=True)
+        
+        return summary, len(rawtext.split(' ')), len(summary.split(' '))
+        
+        
+    else:
+        print("Text is analyzed by Spacy")
+        stopwords = list(STOP_WORDS)
     # print(stopwords)
-    nlp = spacy.load('en_core_web_sm')
-    doc = nlp(rawtext)
+        nlp = spacy.load('en_core_web_sm')
+        doc = nlp(rawtext)
     # print(doc)
 
-    tokens = [token.text for token in doc]
+        tokens = [token.text for token in doc]
 
-    word_freq = {}
+        word_freq = {}
 
-    for word in doc:
-        if word.text.lower() not in stopwords and word.text.lower() not in punctuation:
-            if word.text not in word_freq.keys():
-                word_freq[word.text] = 1
-            else:
-                word_freq[word.text] += 1
-
-    max_freq = max(word_freq.values())
-
-    for word in word_freq.keys():
-        word_freq[word] = word_freq[word] / max_freq
-
-    sent_tokens = [sent for sent in doc.sents]
-
-    sent_score = {}
-
-    for sent in sent_tokens:
-        for word in sent:
-            if word.text in word_freq.keys():
-                if sent not in sent_score.keys():
-                    sent_score[sent] = word_freq[word.text]
+        for word in doc:
+            if word.text.lower() not in stopwords and word.text.lower() not in punctuation:
+                if word.text not in word_freq.keys():
+                  word_freq[word.text] = 1
                 else:
-                    sent_score[sent] += word_freq[word.text]
+                  word_freq[word.text] += 1
 
-    select_length = int(len(sent_tokens) * 0.3)
-    summary = nlargest(select_length, sent_score, key=sent_score.get)
+        max_freq = max(word_freq.values())
 
-    final_summary = [word.text for word in summary]
-    summary = ' '.join(final_summary[::-1])  # Reverse the order of the summary
+        for word in word_freq.keys():
+            word_freq[word] = word_freq[word] / max_freq
 
-    return summary, doc, len(rawtext.split(' ')), len(summary.split(' '))
+        sent_tokens = [sent for sent in doc.sents]
+
+        sent_score = {}
+
+        for sent in sent_tokens:
+            for word in sent:
+                if word.text in word_freq.keys():
+                   if sent not in sent_score.keys():
+                     sent_score[sent] = word_freq[word.text]
+                   else:
+                     sent_score[sent] += word_freq[word.text]
+
+        select_length = int(len(sent_tokens) * 0.3)
+        summary = nlargest(select_length, sent_score, key=sent_score.get)
+
+        final_summary = [word.text for word in summary]
+        summary = ' '.join(final_summary[::-1])  # Reverse the order of the summary
+
+        return summary, doc, len(rawtext.split(' ')), len(summary.split(' '))
 
 
 if __name__ == "__main__":
