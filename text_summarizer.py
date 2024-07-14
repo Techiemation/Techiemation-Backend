@@ -1,10 +1,10 @@
 import spacy
-import transformers
+from transformers import T5Tokenizer, T5ForConditionalGeneration, T5Config
 import torch
 from spacy.lang.en.stop_words import STOP_WORDS
 from string import punctuation
 from heapq import nlargest
-from transformers import T5Tokenizer, T5ForConditionalGeneration, T5Config
+
 
 rawtext1 = """
 """
@@ -13,24 +13,21 @@ rawtext1 = """
 def summarizer(rawtext):
     
     print(len(rawtext))
-    if len(rawtext) < 1000:
+    if len(rawtext) < 50:
         print("Text is analyzed by Transformer")
         
-        transformers.logging.set_verbosity_error()
-        
-        tokenizer = T5Tokenizer.from_pretrained('t5-small', legacy=False)
         model = T5ForConditionalGeneration.from_pretrained('t5-small')
+        tokenizer = T5Tokenizer.from_pretrained('t5-small', legacy=False)
         device = torch.device('cpu')
-        
+
         preprocessed_text = rawtext.strip().replace('\n','')
         t5_input_text = "summarize: " + preprocessed_text
 
         t5_input_text
-        
+
         tokenized_text = tokenizer.encode(t5_input_text, return_tensors='pt', max_length=512, truncation=True).to(device)
-        summary_ids = model.generate(tokenized_text, min_length=30, max_length=120, use_cache=False)
+        summary_ids = model.generate(tokenized_text, min_length=30, max_length=200)
         summary = tokenizer.decode(summary_ids[0], skip_special_tokens=True)
-        
         
         return summary, len(rawtext.split(' ')), len(summary.split(' '))
         
