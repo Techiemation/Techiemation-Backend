@@ -1,5 +1,6 @@
 import spacy
-from transformers import T5Tokenizer, T5ForConditionalGeneration, T5Config
+from transformers import T5Tokenizer, T5ForConditionalGeneration, T5Config, AutoTokenizer
+#from transformers import PegasusForConditionalGeneration, PegasusTokenizer
 import torch
 from spacy.lang.en.stop_words import STOP_WORDS
 from string import punctuation
@@ -13,21 +14,43 @@ rawtext1 = """
 def summarizer(rawtext):
     
     print(len(rawtext))
-    if len(rawtext) < 50:
+    if len(rawtext) < 2000:
         print("Text is analyzed by Transformer")
         
         model = T5ForConditionalGeneration.from_pretrained('t5-small')
-        tokenizer = T5Tokenizer.from_pretrained('t5-small', legacy=False)
+        tokenizer = AutoTokenizer.from_pretrained('t5-small', legacy=False)
         device = torch.device('cpu')
 
         preprocessed_text = rawtext.strip().replace('\n','')
+        #print(preprocessed_text)
         t5_input_text = "summarize: " + preprocessed_text
-
-        t5_input_text
+        
+        #print(t5_input_text)
 
         tokenized_text = tokenizer.encode(t5_input_text, return_tensors='pt', max_length=512, truncation=True).to(device)
-        summary_ids = model.generate(tokenized_text, min_length=30, max_length=200)
+        #print(tokenized_text)
+        # summary_ids = model.generate(tokenized_text, min_length=30, max_length=200)
+        # print(summary_ids)
+        # summary = tokenizer.decode(summary_ids[0], skip_special_tokens=True, clean_up_tokenization_spaces=True)
+        summary_ids = model.generate(tokenized_text,
+                                    num_beams=4,
+                                    no_repeat_ngram_size=2,
+                                    min_length=30,
+                                    max_length=200,
+                                    early_stopping=True)
+
         summary = tokenizer.decode(summary_ids[0], skip_special_tokens=True)
+        #print(summary)
+        
+        
+        
+        # tokenizer = PegasusTokenizer.from_pretrained("google/pegasus-xsum")
+        # model = PegasusForConditionalGeneration.from_pretrained("google/pegasus-xsum")
+        # tokens = tokenizer(rawtext, truncation=True, padding="longest", return_tensors="pt")
+        
+        # summary = model.generate(**tokens)
+        
+        # summary = tokenizer.decode(summary[0])
         
         return summary, len(rawtext.split(' ')), len(summary.split(' '))
         
