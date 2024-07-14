@@ -14,7 +14,7 @@ rawtext1 = """
 def summarizer(rawtext):
     
     print(len(rawtext))
-    if len(rawtext) < 2000:
+    if len(rawtext) > 2000:
         print("Text is analyzed by Transformer")
         
         model = T5ForConditionalGeneration.from_pretrained('t5-small')
@@ -40,17 +40,7 @@ def summarizer(rawtext):
                                     early_stopping=True)
 
         summary = tokenizer.decode(summary_ids[0], skip_special_tokens=True)
-        #print(summary)
         
-        
-        
-        # tokenizer = PegasusTokenizer.from_pretrained("google/pegasus-xsum")
-        # model = PegasusForConditionalGeneration.from_pretrained("google/pegasus-xsum")
-        # tokens = tokenizer(rawtext, truncation=True, padding="longest", return_tensors="pt")
-        
-        # summary = model.generate(**tokens)
-        
-        # summary = tokenizer.decode(summary[0])
         
         return summary, len(rawtext.split(' ')), len(summary.split(' '))
         

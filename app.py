@@ -94,8 +94,10 @@ def summarize():
             "len_original_text": len_original_text,
             "len_summary": len_summary
         })
+        
 
     return jsonify({"summarized_text": rawtext})
+
 
 
 if __name__ == '__main__':
