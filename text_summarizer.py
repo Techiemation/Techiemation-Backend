@@ -14,7 +14,7 @@ rawtext1 = """
 def summarizer(rawtext):
     
     print(len(rawtext))
-    if len(rawtext) > 2000:
+    if len(rawtext) < 2000:
         print("Text is analyzed by Transformer")
         
         model = T5ForConditionalGeneration.from_pretrained('t5-small')
@@ -42,7 +42,7 @@ def summarizer(rawtext):
         summary = tokenizer.decode(summary_ids[0], skip_special_tokens=True)
         
         
-        return summary, len(rawtext.split(' ')), len(summary.split(' '))
+        return summary, len(rawtext), len(summary)
         
         
     else:
