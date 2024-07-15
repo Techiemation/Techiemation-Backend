@@ -42,7 +42,7 @@ def summarizer(rawtext):
         summary = tokenizer.decode(summary_ids[0], skip_special_tokens=True)
         
         
-        return summary, len(rawtext), len(summary)
+        return summary, rawtext, len(rawtext.split(' ')), len(summary.split(' '))
         
         
     else:
