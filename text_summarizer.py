@@ -14,11 +14,11 @@ rawtext1 = """
 def summarizer(rawtext):
     
     print(len(rawtext))
-    if len(rawtext) < 512:
+    if len(rawtext) < 1000:
         print("Text is analyzed by Transformer")
         
-        model = T5ForConditionalGeneration.from_pretrained('t5-small')
-        tokenizer = AutoTokenizer.from_pretrained('t5-small', legacy=False)
+        model = T5ForConditionalGeneration.from_pretrained('t5-large')
+        tokenizer = AutoTokenizer.from_pretrained('t5-large')
         device = torch.device('cpu')
 
         preprocessed_text = rawtext.strip().replace('\n','')
@@ -29,17 +29,18 @@ def summarizer(rawtext):
 
         tokenized_text = tokenizer.encode(t5_input_text, return_tensors='pt', max_length=512, truncation=True).to(device)
         #print(tokenized_text)
-        # summary_ids = model.generate(tokenized_text, min_length=30, max_length=200)
+        # summary_ids = model.generate(tokenized_text, min_length=30, max_length=100)
         # print(summary_ids)
         # summary = tokenizer.decode(summary_ids[0], skip_special_tokens=True, clean_up_tokenization_spaces=True)
         summary_ids = model.generate(tokenized_text,
                                     num_beams=4,
                                     no_repeat_ngram_size=2,
                                     min_length=30,
-                                    max_length=200,
-                                    early_stopping=True)
+                                    max_length=100,
+                                    #early_stopping=True)
+                                    length_penalty=4.0)
 
-        summary = tokenizer.decode(summary_ids[0], skip_special_tokens=True)
+        summary = tokenizer.decode(summary_ids[0], skip_special_tokens=True, clean_up_tokenization_spaces=True)
         
         
         return summary, rawtext, len(rawtext.split(' ')), len(summary.split(' '))
