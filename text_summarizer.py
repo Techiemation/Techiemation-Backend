@@ -14,7 +14,7 @@ rawtext1 = """
 def summarizer(rawtext):
     
     print(len(rawtext))
-    if len(rawtext) < 2000:
+    if len(rawtext) < 512:
         print("Text is analyzed by Transformer")
         
         model = T5ForConditionalGeneration.from_pretrained('t5-small')
